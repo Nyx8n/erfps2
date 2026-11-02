@@ -8,8 +8,27 @@ pub struct Config {
     pub gameplay: Gameplay,
     pub player: Player,
     pub stabilizer: Stabilizer,
-    pub tracker: Tracker,
     pub crosshair: Crosshair,
+    #[serde(default)]
+    pub camera: Camera,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(default)]
+pub struct Camera {
+    pub look_down_forward: f32,
+    pub look_down_up: f32,
+    pub look_down_start_angle: f32,
+}
+
+impl Default for Camera {
+    fn default() -> Self {
+        Self {
+            look_down_forward: 0.12,
+            look_down_up: 0.10,
+            look_down_start_angle: 25.0,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -28,6 +47,8 @@ pub struct Gameplay {
     pub soft_lock_on: bool,
     pub unlocked_movement: bool,
     pub unobtrusive_dodges: bool,
+    pub track_dodges: bool,
+    pub track_damage: bool,
     pub restricted_sprint: bool,
 }
 
@@ -41,14 +62,6 @@ pub struct Stabilizer {
     pub enabled: bool,
     pub smoothing_window: f32,
     pub smoothing_factor: f32,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Tracker {
-    pub track_dodges: bool,
-    pub track_damage: bool,
-    pub track_attacks: bool,
-    pub track_ashes: bool,
 }
 
 #[derive(Debug, Deserialize)]

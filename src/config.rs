@@ -32,10 +32,6 @@ pub struct Config {
 
     pub track_damage: bool,
 
-    pub track_attacks: bool,
-
-    pub track_ashes: bool,
-
     pub restricted_sprint: bool,
 
     pub use_stabilizer: bool,
@@ -55,6 +51,12 @@ pub struct Config {
     pub correction_strength: f32,
 
     pub correction_cylindricity: f32,
+
+    pub look_down_forward: f32,
+
+    pub look_down_up: f32,
+
+    pub look_down_start_angle: f32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Deserialize)]
@@ -94,6 +96,14 @@ impl From<toml::Config> for Config {
             toml::FovCorrection::Barrel => (true, true),
         };
 
+        let look_down_forward = config.camera.look_down_forward.clamp(0.0, 0.6);
+        let look_down_up = config.camera.look_down_up.clamp(-0.2, 0.4);
+        let look_down_start_angle = config
+            .camera
+            .look_down_start_angle
+            .clamp(0.0, 70.0)
+            .to_radians();
+
         Self {
             fov,
             angle_limit: const { [f32::to_radians(-80.0), f32::to_radians(70.0)] },
@@ -104,10 +114,8 @@ impl From<toml::Config> for Config {
             soft_lock_on: config.gameplay.soft_lock_on,
             unlocked_movement: config.gameplay.unlocked_movement,
             unobtrusive_dodges: config.gameplay.unobtrusive_dodges,
-            track_dodges: config.tracker.track_dodges,
-            track_damage: config.tracker.track_damage,
-            track_attacks: config.tracker.track_attacks,
-            track_ashes: config.tracker.track_ashes,
+            track_dodges: config.gameplay.track_dodges,
+            track_damage: config.gameplay.track_damage,
             restricted_sprint: config.gameplay.restricted_sprint,
             use_stabilizer: config.stabilizer.enabled,
             stabilizer_window,
@@ -118,6 +126,9 @@ impl From<toml::Config> for Config {
             use_barrel_correction,
             correction_strength,
             correction_cylindricity,
+            look_down_forward,
+            look_down_up,
+            look_down_start_angle,
         }
     }
 }

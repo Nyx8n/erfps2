@@ -1,36 +1,38 @@
-use std::collections::VecDeque;
-
 use glam::Vec3;
 
 use crate::core::frame_cached::FrameCache;
 
+/// Frame-rate independent camera position smoothing.
+///
+/// The original implementation averaged the last N samples, with N derived from
+/// `window / frame_time`. At low or uneven frame rates (e.g. 20-30 fps with frame
+/// generation) N kept changing from frame to frame, which made the average jump
+/// and showed up as camera stutter.
+///
+/// This version uses time-based exponential smoothing instead: the amount of
+/// smoothing per frame depends only on the elapsed time, so uneven frame times
+/// no longer cause discontinuities.
 pub struct CameraStabilizer {
     window: f32,
-    samples: u32,
-    buf: VecDeque<Vec3>,
+    value: Option<Vec3>,
 }
 
 impl CameraStabilizer {
     pub const DEFAULT_WINDOW: f32 = 0.3;
 
+    /// Longest frame time taken into account, so a single hitch cannot cause a snap.
+    const MAX_FRAME_TIME: f32 = 0.1;
+    const MIN_FRAME_TIME: f32 = 1.0 / 480.0;
+
     pub const fn new(window: f32) -> Self {
         Self {
             window,
-            samples: 0,
-            buf: VecDeque::new(),
+            value: None,
         }
     }
 
     pub fn set_window(&mut self, window: f32) {
         self.window = window;
-    }
-
-    fn average(&self, default: Vec3) -> Vec3 {
-        if !self.buf.is_empty() {
-            self.buf.iter().sum::<Vec3>() / self.buf.len() as f32
-        } else {
-            default
-        }
     }
 }
 
@@ -39,18 +41,28 @@ impl FrameCache for CameraStabilizer {
     type Output<'a> = Vec3;
 
     fn update(&mut self, frame_time: f32, input: Self::Input) -> Self::Output<'_> {
-        self.samples = (self.window / frame_time).ceil() as u32;
-        self.buf.push_front(input);
-        self.buf.truncate(self.samples as usize);
-        self.average(input)
+        let dt = frame_time.clamp(Self::MIN_FRAME_TIME, Self::MAX_FRAME_TIME);
+
+        // A moving average over `window` seconds lags by about `window / 2`,
+        // so use that as the time constant.
+        let tau = (self.window * 0.5).max(1e-3);
+        let alpha = 1.0 - (-dt / tau).exp();
+
+        let smoothed = match self.value {
+            Some(previous) => previous.lerp(input, alpha),
+            None => input,
+        };
+
+        self.value = Some(smoothed);
+        smoothed
     }
 
     fn get_cached(&mut self, _frame_time: f32, input: Self::Input) -> Self::Output<'_> {
-        self.average(input)
+        self.value.unwrap_or(input)
     }
 
     fn reset(&mut self) {
-        self.buf.clear();
+        self.value = None;
     }
 }
 

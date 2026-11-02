@@ -5,7 +5,7 @@
 [fov]
 # Horizontal field of view (in degrees) in first person.
 # Possible value range: 45.0 - 130.0
-horizontal_fov = 90.0
+horizontal_fov = 80.0
 
 # Correction of distortion caused by high FOV.
 # These options reduce FOV distortion and may improve depth perception in first person.
@@ -15,12 +15,12 @@ fov_correction = "barrel"
 # The strength of FOV correction.
 # Larger values may introduce visible radial curvature and a reduction in image quality.
 # Possible value range: 0.0 - 1.0
-fov_correction_strength = 0.55
+fov_correction_strength = 0.3
 
 # The aspect ratio correction strength for "barrel" fov_correction.
 # Larger values reduce horizontal stretch and increase vertical stretch.
 # Possible value range: 0.0 - 1.0
-fov_correction_cylindricity = 1.0
+fov_correction_cylindricity = 0.6
 
 [gameplay]
 # When starting up the game and loading a character the camera will start out in first person.
@@ -42,6 +42,12 @@ unlocked_movement = true
 # The player's body is made transparent during dodges, improving visibility.
 unobtrusive_dodges = false
 
+# Camera movement will be synchronized with head movement for dodges.
+track_dodges = false
+
+# Camera movement will be synchronized with head movement when the player is damaged.
+track_damage = false
+
 # Initial sprinting direction is restricted to moving forward.
 restricted_sprint = false
 
@@ -51,24 +57,6 @@ restricted_sprint = false
 # Possible value range: 0.95 - 1.05
 height_multiplier = 1.0
 
-[tracker]
-# Synchronize camera movement with head movement for dodges.
-track_dodges = false
-
-# Synchronize camera movement with head movement when the player is damaged.
-track_damage = false
-
-# Synchronize camera movement with head movement when attacking.
-track_attacks = false
-
-# Synchronize camera movement with head movement when using Ashes of War.
-# Some attacks are not supported (yet?), the animations are too fast or erratic.
-#   Examples:
-#     Black Knife: Blade of Death art (double spin)
-#     Grave Scythe: Spinning Slash art, press twice
-#     Mantis Blade: Spinning Slash art, press twice
-track_ashes = false
-
 [stabilizer]
 # Stabilization of camera movement in first person.
 enabled = true
@@ -76,12 +64,28 @@ enabled = true
 # The time period (in fractions of a second) to sample camera positions.
 # Larger values result in smoother camera movement but make it slower to adjust.
 # Possible value range: 0.1 - 1.0
-smoothing_window = 0.3
+smoothing_window = 0.4
 
 # The strength of camera smoothing.
 # Larger values result in smoother camera movement but also separate it from the player's.
 # Possible value range: 0.0 - 1.0
 smoothing_factor = 0.8
+
+[camera]
+# How far the camera moves forward (in meters) when looking down, so it stays
+# in front of the chest instead of clipping into the body.
+# Raise this if you still see the inside of your character when looking down.
+# Possible value range: 0.0 - 0.6
+look_down_forward = 0.12
+
+# How far the camera moves up (in meters) when looking down.
+# Possible value range: -0.2 - 0.4
+look_down_up = 0.10
+
+# The downward look angle (in degrees) at which the offset starts to apply.
+# It reaches its full value at about 80 degrees down.
+# Possible value range: 0.0 - 70.0
+look_down_start_angle = 25.0
 
 [crosshair]
 # Crosshair in first person.
